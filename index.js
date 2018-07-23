@@ -39,3 +39,6 @@ app.get('/template', template.get);
 var upload = require('./upload.js');
 app.post('/', upload.post);
 
+var splitFile = require('./split.js');
+app.get('/split', splitFile.get);
+

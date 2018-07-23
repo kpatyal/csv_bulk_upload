@@ -9,6 +9,7 @@
   "coupan": "",
   "dependencies": {
     "csv": "^3.1.0",
+    "csv-split-stream": "^1.0.2",
     "csv-stream": "^0.2.0",
     "express": "^4.16.3",
     "express-fileupload": "^0.4.0",

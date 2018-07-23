@@ -71,6 +71,7 @@ exports.post = function (req, res) {
 		console.error(err)
 	  })
     }
+	
 	/**
 	* Upload data in database.
 	* Bulk upload.
