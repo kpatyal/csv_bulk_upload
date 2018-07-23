@@ -4,29 +4,50 @@ const through2 = require('through2')
 const fs = require('fs')
 const csv = require('csv-stream')
 const chunksCount = 100;
-
+let maxId = 0;
 exports.post = function (req, res) {
-	if (!req.
-		files)
-		return res.status(400).send('No files were uploaded.');
+	if (!req.files)
+	  return res.status(400).send('No files were uploaded.');
 	const voucherFile = req.files.file;
-    //console.log('voucherFile-------->',voucherFile)
 	let vouchers = [];
+	
+	/**
+	* Get max id.
+	*/
+	Voucher.find({}, null, {sort: {'id': -1}, limit: 1}, (err, voucher) => {
+      if(err)
+        res.send(err);
+	  if(voucher)
+		 maxId = voucher[0].id;
+	  startStreaming()
+    });
+	
+    /**
+	* Parsing  of csv file.
+	*/
+	let startStreaming = () => {
 	const stream = fs.createReadStream('datta.csv')
 	  .pipe(csv.createStream({
 		  endLine : '\n',
-		  //columns : ['id', 'coupan', 'openid', 'assignedDateTime', 'lastAccessedDateTime', 'isAssigned', 'isUsed'],
+		  columns : ['coupan'],//['id', 'coupan', 'openid', 'assignedDateTime', 'lastAccessedDateTime', 'isAssigned', 'isUsed'],
 		  escapeChar : '"',
 		  enclosedChar : '"'
 	  }))
 	  .pipe(through2({ objectMode: true }, (row, enc, cb) => {
-		 
-		  row['_id'] = new mongoose.Types.ObjectId()
-		  //console.log('new row', row);
-		  vouchers.push(row);
-		  //console.log('length', vouchers.length);
-		if(vouchers.length === chunksCount){
-			//console.log('Condition matched-----------', vouchers[0]);
+		  maxId = maxId+1;
+		  let voucher = {
+			  _id: new mongoose.Types.ObjectId(),
+			  id: maxId,
+			  coupan: row.coupan,
+			  openid: '',
+			  assignedDateTime: '',
+			  lastAccessedDateTime: '',
+			  isAssigned: false,
+			  isUsed: false
+		  };
+		  
+		  vouchers.push(voucher);
+		  if(vouchers.length === chunksCount){
 			saveIntoDatabase(vouchers).then(() => {
 			  vouchers=[];
 		      cb(null, true)
@@ -40,7 +61,7 @@ exports.post = function (req, res) {
 		
 	  }))
 	  .on('data', data => {
-		console.log('saved a row')
+		//console.log('saved a row')
 	  })
 	  .on('end', () => {
 		console.log('end')
@@ -49,9 +70,12 @@ exports.post = function (req, res) {
 	  .on('error', err => {
 		console.error(err)
 	  })
-
+    }
+	/**
+	* Upload data in database.
+	* Bulk upload.
+	*/
 	const saveIntoDatabase = vouchers => {
-	  //console.log('chunks----->', vouchers)
 	  return new Promise((resolve, reject) => {
 		  Voucher.create(vouchers, function(err, documents) {
 			if (err) throw err;
@@ -60,4 +84,4 @@ exports.post = function (req, res) {
 		  });
 	  })
 	}
-	};
+};
