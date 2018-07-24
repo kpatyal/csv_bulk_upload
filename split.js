@@ -2,11 +2,11 @@ const csvSplitStream = require('csv-split-stream');
 const fs = require('fs');
 exports.get = function (req, res) {
 	csvSplitStream.split(
-	  fs.createReadStream('datta.csv'),
+	  fs.createReadStream('original/7m.csv'),
 	  {
 		lineLimit: 100000
 	  },
-	  (index) => fs.createWriteStream(`output-${index}.csv`)
+	  (index) => fs.createWriteStream(`split/7m-${index}.csv`)
 	)
 	.then(csvSplitResponse => {
 	  console.log('csvSplitStream succeeded.', csvSplitResponse);
