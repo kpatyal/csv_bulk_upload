@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const Voucher = require('./voucher');
+const coupons = require('./voucher');
 const through2 = require('through2')
 const fs = require('fs')
 const csv = require('csv-stream')
-const chunksCount = 100;
+const chunksCount = 1000;
 let maxId = 0;
 exports.post = function (req, res) {
 	if (!req.files)
@@ -14,7 +14,7 @@ exports.post = function (req, res) {
 	/**
 	* Get max id.
 	*/
-	Voucher.find({}, null, {sort: {'id': -1}, limit: 1}, (err, voucher) => {
+	coupons.find({}, null, {sort: {'id': -1}, limit: 1}, (err, voucher) => {
       if(err)
         res.send(err);
 	  if(voucher)
@@ -26,7 +26,7 @@ exports.post = function (req, res) {
 	* Parsing  of csv file.
 	*/
 	let startStreaming = () => {
-	const stream = fs.createReadStream('datta.csv')
+	const stream = fs.createReadStream('split/7m-0.csv')
 	  .pipe(csv.createStream({
 		  endLine : '\n',
 		  columns : ['coupan'],//['id', 'coupan', 'openid', 'assignedDateTime', 'lastAccessedDateTime', 'isAssigned', 'isUsed'],
@@ -71,14 +71,13 @@ exports.post = function (req, res) {
 		console.error(err)
 	  })
     }
-	
 	/**
 	* Upload data in database.
 	* Bulk upload.
 	*/
 	const saveIntoDatabase = vouchers => {
 	  return new Promise((resolve, reject) => {
-		  Voucher.create(vouchers, function(err, documents) {
+		  coupons.create(vouchers, function(err, documents) {
 			if (err) throw err;
 			console.log(vouchers.length + ' vouchers have been successfully uploaded.');
 			resolve()

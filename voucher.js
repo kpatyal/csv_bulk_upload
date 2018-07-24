@@ -16,6 +16,6 @@ var voucherSchema = mongoose.Schema({
 	isUsed: String	
 });
 
-var Voucher = mongoose.model('Voucher', voucherSchema);
+var coupons = mongoose.model('coupons', voucherSchema);
 
-module.exports = Voucher;
+module.exports = coupons;
