@@ -3,7 +3,7 @@ const coupons = require('./voucher');
 const through2 = require('through2')
 const fs = require('fs')
 const csv = require('csv-stream')
-const chunksCount = 1000;
+const chunksCount = 100000;
 let maxId = 0;
 exports.post = function (req, res) {
 	if (!req.files)
@@ -15,9 +15,10 @@ exports.post = function (req, res) {
 	* Get max id.
 	*/
 	coupons.find({}, null, {sort: {'id': -1}, limit: 1}, (err, voucher) => {
+		console.log('enter-----', err, '----', voucher);
       if(err)
         res.send(err);
-	  if(voucher)
+	  if(voucher && voucher.length>0)
 		 maxId = voucher[0].id;
 	  startStreaming()
     });
@@ -26,14 +27,15 @@ exports.post = function (req, res) {
 	* Parsing  of csv file.
 	*/
 	let startStreaming = () => {
-	const stream = fs.createReadStream('split/7m-0.csv')
+	const stream = fs.createReadStream('datta.csv')
 	  .pipe(csv.createStream({
 		  endLine : '\n',
-		  columns : ['coupan'],//['id', 'coupan', 'openid', 'assignedDateTime', 'lastAccessedDateTime', 'isAssigned', 'isUsed'],
+		  //columns : ['coupan'],//['id', 'coupan', 'openid', 'assignedDateTime', 'lastAccessedDateTime', 'isAssigned', 'isUsed'],
 		  escapeChar : '"',
 		  enclosedChar : '"'
 	  }))
 	  .pipe(through2({ objectMode: true }, (row, enc, cb) => {
+	  	  console.log('------row------', row, enc, cb);
 		  maxId = maxId+1;
 		  let voucher = {
 			  _id: new mongoose.Types.ObjectId(),
@@ -56,6 +58,7 @@ exports.post = function (req, res) {
 			  cb(err, null)
 			})
 		}else{
+
 			cb(null, true)
 		}
 		
@@ -64,7 +67,16 @@ exports.post = function (req, res) {
 		//console.log('saved a row')
 	  })
 	  .on('end', () => {
-		console.log('end')
+		console.log('end',vouchers.length)
+		if(vouchers.length > 0){
+			saveIntoDatabase(vouchers).then(() => {
+			  vouchers=[];
+		      cb(null, true)
+			})
+			.catch(err => {
+			  cb(err, null)
+			})
+		}
 		res.status(200).send('vouchers have been successfully uploaded.');
 	  })
 	  .on('error', err => {

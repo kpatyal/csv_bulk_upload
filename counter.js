@@ -7,7 +7,7 @@ const coupons = require('./voucher');
 exports.get = function (req, res) {
 	Promise.all([
 	  coupons.count({}),
-	  coupons.count({ isAssigned: 'TRUE'})
+	  coupons.count({ isAssigned: false})
 	]).then( ([ totalCoupons, assignedCoupons ]) => {
 	  res.status(200).json({total: totalCoupons, assigned: assignedCoupons});
     });
@@ -17,6 +17,7 @@ exports.get = function (req, res) {
 *  To get the count of total coupons.
 */
 exports.totalCoupans = function(req, res){
+	console.log('in')
 	coupons.count({}, (error, count) => {
 		if(err){
 			res.status(500).send(err);
@@ -30,7 +31,7 @@ exports.totalCoupans = function(req, res){
 *  To get the count of assigned coupons.
 */
 exports.assignedCoupans = function(req, res){
-	coupons.count({ isAssigned: 'TRUE'}, (error, count) => {
+	coupons.count({ isAssigned: true}, (error, count) => {
 		if(err){
 			res.status(500).send(err);
 		}
