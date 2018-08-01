@@ -7,7 +7,7 @@ const fs = require('fs')
 exports.get = function (req, res) {
 	Promise.all([
 	  coupons.count({}),
-	  coupons.count({ isAssigned: false})
+	  coupons.count({ isAssigned: true})
 	]).then( ([ totalCoupons, assignedCoupons ]) => {
 	  res.status(200).json({total: totalCoupons, assigned: assignedCoupons});
     });
