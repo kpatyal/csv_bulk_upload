@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const coupons = require('./voucher');
-
+const fs = require('fs')
 /**
 *  To get the count of total coupons and assigned coupons.
 */
@@ -17,13 +17,12 @@ exports.get = function (req, res) {
 *  To get the count of total coupons.
 */
 exports.totalCoupans = function(req, res){
-	console.log('in')
 	coupons.count({}, (error, count) => {
-		if(err){
-			res.status(500).send(err);
+		if(error){
+			res.status(500).send(error);
 		}
 
-		res.status.json({'total_coupons': count});
+		res.status(200).send({'total_coupons': count});
 	})
 }
 
@@ -31,40 +30,30 @@ exports.totalCoupans = function(req, res){
 *  To get the count of assigned coupons.
 */
 exports.assignedCoupans = function(req, res){
-	coupons.count({ isAssigned: true}, (error, count) => {
-		if(err){
-			res.status(500).send(err);
+	coupons.count({isAssigned: true}, (error, count) => {
+		if(error){
+			res.status(500).send(error);
 		}
 
-		res.status.json({'total_assigned_coupons': count});
+		res.status(200).send({'total_assigned_coupons': count});
 	})
 }
 
 
-exports.another = function(req, res){
-	
-// 	coupons.aggregate([
-//     {
-//         "$group": {
-//             "_id": { "$dateToString": { "format": "%Y-%m-%d", "date": "$assignedDateTime" } },
-//             "total": { "$sum": 1 },
-//             "active_count": {
-//                 "$sum": {
-//                     "$cond": [ { "$eq": [ "$isAssigned", 'TRUE' ] }, 1, 0 ]
-//                 }
-//             },
-//             "inactive_count": {
-//                 "$sum": {
-//                     "$cond": [ { "$eq": [ "$isAssigned", "FALSE" ] }, 1, 0 ]
-//                 }
-//             }
-//         }
-//     },
-//     { "$sort": { "_id": 1 } }
-// ], (err, result) => {
-// 	if(err)
-//         res.send(err);
-// 	  if(result)
-// 		 console.log('-----count------',result)
-// })
+exports.duplicate = function(req, res){
+
+	coupons.aggregate(
+		[{ $group: {
+		      _id: { coupon: "$coupon" },   // replace `name` here twice
+		      uniqueIds: { $addToSet: "$_id" },
+		      count: { $sum: 1 } 
+		    } }, 
+            { $match: { 
+               count: { $gte: 2 } 
+            } },
+            { $sort : { count : -1} },
+        ]).exec(function(err, result){
+        	console.log('err----', err);
+        	console.log('result=====', result);
+        });
 }

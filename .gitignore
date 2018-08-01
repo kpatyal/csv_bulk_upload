@@ -11,6 +11,8 @@ $RECYCLE.BIN/
 node_modules
 original
 split
+des
+final
 
 # Windows Installer files
 *.cab

@@ -25,6 +25,8 @@ server.listen(8088);
 // 		readPreference: 'secondary'
 // 	}
 // });
+var db = mongoose.connect();
+
 app.get('/', function (req, res) {
   res.sendFile(__dirname + '/index.html');
 });
@@ -33,7 +35,7 @@ var template = require('./template.js');
 app.get('/template', template.get);
 
 var upload = require('./upload.js');
-app.post('/', upload.post);
+app.get('/upload', upload.post);
 
 var splitFile = require('./split.js');
 app.get('/split', splitFile.get);
@@ -43,6 +45,15 @@ var counter  = require('./counter.js');
 app.get('/count', counter.get);
 app.get('/totalCoupans', counter.totalCoupans);
 app.get('/assignedCoupans', counter.assignedCoupans);
+
+app.get('/duplicate', counter.duplicate);
+
+
+var create = require('./create.js');
+app.get('/create', create.post);
+
+var removeme = require('./removeme.js');
+app.get('/removeme', removeme.post);
 
 
 

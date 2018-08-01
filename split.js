@@ -6,7 +6,7 @@ exports.get = function (req, res) {
 	  {
 		lineLimit: 100000
 	  },
-	  (index) => fs.createWriteStream(`split/7m-${index}.csv`)
+	  (index) => fs.createWriteStream(`des/seven/7m-${index}.csv`)
 	)
 	.then(csvSplitResponse => {
 	  console.log('csvSplitStream succeeded.', csvSplitResponse);

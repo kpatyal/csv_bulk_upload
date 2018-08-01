@@ -8,7 +8,7 @@ var voucherSchema = mongoose.Schema({
 		type: Number,
 		required: true
 	},
-	coupan: String,
+	coupon: String,
 	openid: String,
 	assignedDateTime: String,
 	lastAcessedDateTime: String,
